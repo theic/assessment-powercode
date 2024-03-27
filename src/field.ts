@@ -51,12 +51,26 @@ export class Field<T> {
   validate(value: T): string[] {
     const errors: string[] = [];
 
-    for (const rule of this.rules) {
-      if (!rule.validate(value)) {
-        errors.push(rule.getErrorMessage());
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        for (const rule of this.rules) {
+          if (!rule.validate(item)) {
+            errors.push(rule.getErrorMessage());
+          }
+        }
+      }
+    } else {
+      for (const rule of this.rules) {
+        if (!rule.validate(value)) {
+          errors.push(rule.getErrorMessage());
+        }
       }
     }
 
     return errors;
+  }
+
+  isOptional(): boolean {
+    return !this.rules.some(rule => rule instanceof RequiredRule);
   }
 }

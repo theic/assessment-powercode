@@ -12,12 +12,16 @@ export class Schema<T extends Record<string, any>> {
 
   validate(data: Partial<T>): { isValid: boolean; errors: Partial<Record<keyof T, string[]>> } {
     const errors: Partial<Record<keyof T, string[]>> = {};
-
+  
     for (const fieldName in this.fields) {
       const field = this.fields[fieldName];
       const fieldValue = data[fieldName];
-
+  
       if (field instanceof Field) {
+        if (fieldValue === undefined && field.isOptional()) {
+          continue;
+        }
+  
         const fieldErrors = field.validate(fieldValue as T[typeof fieldName]);
         if (fieldErrors.length > 0) {
           errors[fieldName] = fieldErrors;
@@ -30,7 +34,7 @@ export class Schema<T extends Record<string, any>> {
         }
       }
     }
-
+  
     const isValid = Object.keys(errors).length === 0;
     return { isValid, errors };
   }
