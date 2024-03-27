@@ -1,10 +1,12 @@
-import { ValidationRule } from './validation-rule';
-import { RequiredRule } from './required-rule';
-import { TypeRule } from './type-rule';
-import { CustomRule } from './custom-rule';
-import { MinLengthRule } from './min-length-rule';
-import { MaxLengthRule } from './max-length-rule';
-import { PatternRule } from './pattern-rule';
+import {
+  CustomRule,
+  MaxLengthRule,
+  MinLengthRule,
+  PatternRule,
+  RequiredRule,
+  TypeRule,
+  ValidationRule,
+} from './rules';
 
 export class Field<T> {
   private rules: ValidationRule<T>[] = [];
