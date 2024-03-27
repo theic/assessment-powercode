@@ -10,16 +10,24 @@ export class Schema<T extends Record<string, any>> {
     return this.fields[fieldName] as Field<T[K]>;
   }
 
-  validate(data: T): { isValid: boolean; errors: Partial<Record<keyof T, string[]>> } {
+  validate(data: Partial<T>): { isValid: boolean; errors: Partial<Record<keyof T, string[]>> } {
     const errors: Partial<Record<keyof T, string[]>> = {};
 
     for (const fieldName in this.fields) {
       const field = this.fields[fieldName];
       const fieldValue = data[fieldName];
-      const fieldErrors = field.validate(fieldValue);
 
-      if (fieldErrors.length > 0) {
-        errors[fieldName] = fieldErrors;
+      if (field instanceof Field) {
+        const fieldErrors = field.validate(fieldValue as T[typeof fieldName]);
+        if (fieldErrors.length > 0) {
+          errors[fieldName] = fieldErrors;
+        }
+      } else if (fieldValue !== undefined) {
+        const nestedSchema = field as Schema<T[typeof fieldName]>;
+        const nestedResult = nestedSchema.validate(fieldValue as Partial<T[typeof fieldName]>);
+        if (!nestedResult.isValid) {
+          errors[fieldName] = ['Invalid nested object'];
+        }
       }
     }
 

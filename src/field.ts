@@ -14,6 +14,15 @@ export class Field<T> {
     return this;
   }
 
+  optional(): Field<T | undefined> {
+    this.rules = this.rules.filter((rule) => !(rule instanceof RequiredRule));
+    return this as unknown as Field<T | undefined>;
+  }
+
+  array(): Field<T[]> {
+    return this as unknown as Field<T[]>;
+  }
+
   type(type: string): Field<T> {
     this.rules.push(new TypeRule<T>(type));
     return this;
