@@ -4,9 +4,6 @@ node_modules
 # production
 dist
 
-# testing
-test
-
 # misc
 .DS_Store
 .env
