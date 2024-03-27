@@ -63,25 +63,55 @@ The `validate` method returns an object with the following properties:
 ```typescript
 import { Schema } from 'assessment-powercode';
 
-const schema = new Schema();
-schema.field('name').required().type('string');
-schema.field('age').required().type('number').custom((value) => value >= 18, 'The age must be at least 18.');
+// Example 1: Basic validation
+const userSchema = new Schema<{ name: string; email: string; age: number }>();
+userSchema.field('name').required().type('string');
+userSchema.field('email').required().type('string').custom(value => /\S+@\S+\.\S+/.test(value), 'Invalid email format');
+userSchema.field('age').required().type('number').custom(value => value >= 18, 'Age must be at least 18');
 
-const data = {
+const validUser = {
   name: 'John Doe',
+  email: 'john@example.com',
   age: 25,
 };
 
-const validationResult = schema.validate(data);
-console.log(validationResult);
-```
+const invalidUser = {
+  name: 'Jane Doe',
+  email: 'invalid-email',
+  age: 17,
+};
 
-Output:
-```json
-{
-  "isValid": true,
-  "errors": {}
-}
+console.log(userSchema.validate(validUser));
+// Output: { isValid: true, errors: {} }
+
+console.log(userSchema.validate(invalidUser));
+// Output: { isValid: false, errors: { email: ['Invalid email format'], age: ['Age must be at least 18'] } }
+
+// Example 2: Optional fields and arrays
+const bookSchema = new Schema<{ title: string; author: string; genres?: string[]; publicationYear?: number }>();
+bookSchema.field('title').required().type('string');
+bookSchema.field('author').required().type('string');
+bookSchema.field('genres').optional().array().type('string');
+bookSchema.field('publicationYear').optional().type('number').custom(value => value >= 1900 && value <= new Date().getFullYear(), 'Invalid publication year');
+
+const validBook = {
+  title: 'The Great Gatsby',
+  author: 'F. Scott Fitzgerald',
+  genres: ['Fiction', 'Classic'],
+  publicationYear: 1925,
+};
+
+const invalidBook = {
+  title: 'Invalid Book',
+  author: 'Unknown Author',
+  publicationYear: 2050,
+};
+
+console.log(bookSchema.validate(validBook));
+// Output: { isValid: true, errors: {} }
+
+console.log(bookSchema.validate(invalidBook));
+// Output: { isValid: false, errors: { publicationYear: ['Invalid publication year'] } }
 ```
 
 ## Testing
